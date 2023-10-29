@@ -8,48 +8,60 @@ import Modal from "../../components/Modal";
 import React, { useState } from "react";
 import iphone from "../../images/iphone.png";
 import Cart from "../../components/Cart"
+import axios from "axios";
 
-const products = [
-  {
-    id: 1,
-    name: "iPhone 11",
-    price: 800.0,
-    variants: [
-      {
-        variant_id: 1,
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident perferendis suscipit officia recusandae, eveniet quaerat assumenda id fugit, dignissimos maxime non natus placeat illo iusto! Sapiente dolorum id maiores dolores?",
-      },
-      {
-        variant_id: 2,
-        description:
-          "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "iPhone Pro",
-    price: 1000.0,
-    variants: [
-      {
-        variant_id: 1,
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident perferendis suscipit officia recusandae, eveniet quaerat assumenda id fugit, dignissimos maxime non natus placeat illo iusto! Sapiente dolorum id maiores dolores?",
-      },
-      {
-        variant_id: 2,
-        description:
-          "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
-      },
-    ],
-  },
-];
+
+const baseURL = "http://127.0.0.1:5000";
+
+// var products = [
+//   {
+//     id: 1,
+//     name: "iPhone 11",
+//     price: 800.0,
+//     variants: [
+//       {
+//         variant_id: 1,
+//         description:
+//           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident perferendis suscipit officia recusandae, eveniet quaerat assumenda id fugit, dignissimos maxime non natus placeat illo iusto! Sapiente dolorum id maiores dolores?",
+//       },
+//       {
+//         variant_id: 2,
+//         description:
+//           "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
+//       },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     name: "iPhone Pro",
+//     price: 1000.0,
+//     variants: [
+//       {
+//         variant_id: 1,
+//         description:
+//           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident perferendis suscipit officia recusandae, eveniet quaerat assumenda id fugit, dignissimos maxime non natus placeat illo iusto! Sapiente dolorum id maiores dolores?",
+//       },
+//       {
+//         variant_id: 2,
+//         description:
+//           "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
+//       },
+//     ],
+//   },
+// ];
 
 function Home() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [openCart, setOpenCart] = useState(false);
+
+  const [products, setProducts] = useState([]);
+
+  React.useEffect(() => {
+    axios.get(`${baseURL}/api/products`).then((response) => {
+      setProducts(response.data)
+    });
+  }, []);
 
   const handleOpenDialog = ({ productId }) => {
     const product = products.find((p) => p.id === productId);
@@ -92,16 +104,16 @@ function Home() {
         <p className="main-text">All Products</p>
       </div>
       <ProductGrid>
-        {products.map((product) => {
+        {products.map((product, index) => {
           return (
             <ProductTile
-              key={product.id}
-              src={iphone}
+              key={index}
+              src={product.imageUrl}
               onClick={() => {
                 // alert(product.id)
-                handleOpenDialog({ productId: product.id });
+                handleOpenDialog({ productId: product.variant_id });
               }}
-              title={product.name}
+              title={product.title}
               price={product.price}
             ></ProductTile>
           );
