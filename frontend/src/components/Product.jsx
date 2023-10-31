@@ -10,8 +10,8 @@ function ProductTile(props)
 {
   return <div className='product-grid-tile' onClick={props.onClick}>
     <img alt='Loading' src={props.src}/>
-    <p>{props.title}</p>
-    <p>{"$"+props.price+""}</p>
+    <p className="product-tile-title-text">{props.title}</p>
+    <p className="product-tile-price-text">{"$"+props.price+""}</p>
   </div>
 }
 

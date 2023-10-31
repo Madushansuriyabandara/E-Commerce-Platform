@@ -11,6 +11,7 @@ export const getVariants = async () => {
                 v.price, 
                 p.weight,  
                 p.category_id, 
+                p.default_price,
                 v.image, 
                 v.details, 
                 pr.detailed_description 

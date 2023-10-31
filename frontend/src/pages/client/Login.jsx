@@ -2,25 +2,67 @@ import React, { useState } from "react";
 import "./Login.css";
 import { ReactComponent as PersonIcon } from "../../icons/person-icon.svg";
 import ActionButton from "../../components/ActionButton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
-function Login() {
+const baseURL = "http://127.0.0.1:5000";
+
+
+function Login(props) {
   const [formData, setFormData] = useState({ username: "", password: "" });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const fromPage = location.state?.from?.pathname || '/';
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = async (event) => {
+    // event.preventDefault();
     const { username, password } = formData;
-
-    // You can add your login logic here, e.g., send a request to the server
-
-    // Clear the form fields
-    setFormData({ username: "", password: "" });
+  
+    axios.post(`${baseURL}/api/login`, { username, password })
+      .then(response => {
+        console.log('Login successful', response); // Assuming 'navigate' is correctly instantiated from useHistory or useNavigate
+        localStorage.setItem('tz-user-logged-in', 'true')
+        navigate(fromPage, { replace: true });
+      })
+      .catch(error => {
+        if (error.response) {
+          // Response was received but it's an error status code
+          const status = error.response.status;
+          switch (status) {
+            case 400:
+              alert("Invalid email format!");
+              break;
+            case 401:
+              alert("Invalid password!");
+              break;
+            case 404:
+              alert("Invalid username!");
+              break;
+            case 500:
+              alert("Something went wrong.");
+              break;
+            default:
+              alert("An unknown error occurred.");
+              break;
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.log(error.request);
+          alert("The server did not respond. Please try again later.");
+        } else {
+          // Something else happened while setting up the request
+          console.log('Error', error.message);
+          alert("An error occurred while sending the request.");
+        }
+        console.log(error.config);
+      });
   };
+  
 
   const { username, password } = formData;
   return (
@@ -100,7 +142,7 @@ function Login() {
 
         <ActionButton
           onTap={() => {
-            console.log("Button Clicked");
+            handleSubmit();
           }}
           buttonText="Sign In"
           height="3.5vh"

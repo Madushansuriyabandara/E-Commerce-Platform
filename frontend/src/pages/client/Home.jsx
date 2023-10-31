@@ -1,70 +1,55 @@
-import { ReactComponent as MenuIcon } from "../../icons/menu.svg";
-import { ReactComponent as UserIcon } from "../../icons/user.svg";
-import { ReactComponent as CartIcon } from "../../icons/cart.svg";
-import { ReactComponent as LogoIcon } from "../../icons/logo.svg";
+import { ReactComponent as MenuIcon } from "../../icons/new/menus.svg";
+import { ReactComponent as UserIcon } from "../../icons/new/user.svg";
+import { ReactComponent as CartIcon } from "../../icons/new/shopping-cart.svg";
+import { ReactComponent as LogoIcon } from "../../icons/new/logo.svg";
 import { Navbar, NavItem } from "../../components/Navbar";
 import { ProductGrid, ProductTile } from "../../components/Product";
 import Modal from "../../components/Modal";
-import React, { useState } from "react";
-import iphone from "../../images/iphone.png";
-import Cart from "../../components/Cart"
+import React, { useState, useEffect } from "react";
+import { Cart, transformCartToArray } from "../../components/Cart";
 import axios from "axios";
-
+import useSessionLikeLocalStorage from "../../components/hooks/SessionHook";
 
 const baseURL = "http://127.0.0.1:5000";
 
-// var products = [
-//   {
-//     id: 1,
-//     name: "iPhone 11",
-//     price: 800.0,
-//     variants: [
-//       {
-//         variant_id: 1,
-//         description:
-//           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident perferendis suscipit officia recusandae, eveniet quaerat assumenda id fugit, dignissimos maxime non natus placeat illo iusto! Sapiente dolorum id maiores dolores?",
-//       },
-//       {
-//         variant_id: 2,
-//         description:
-//           "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
-//       },
-//     ],
-//   },
-//   {
-//     id: 2,
-//     name: "iPhone Pro",
-//     price: 1000.0,
-//     variants: [
-//       {
-//         variant_id: 1,
-//         description:
-//           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident perferendis suscipit officia recusandae, eveniet quaerat assumenda id fugit, dignissimos maxime non natus placeat illo iusto! Sapiente dolorum id maiores dolores?",
-//       },
-//       {
-//         variant_id: 2,
-//         description:
-//           "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
-//       },
-//     ],
-//   },
-// ];
-
 function Home() {
   const [openDialog, setOpenDialog] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState({});
+
   const [openCart, setOpenCart] = useState(false);
+
+  const [cartItems, setCartItems] = useState([]);
 
   const [products, setProducts] = useState([]);
 
-  React.useEffect(() => {
+  useSessionLikeLocalStorage();
+
+  useEffect(() => {
     axios.get(`${baseURL}/api/products`).then((response) => {
-      setProducts(response.data)
+      let data = [];
+      for (let key in response.data) {
+        data.push(response.data[key]);
+      }
+      setProducts(data);
+      
+      let currentCart = JSON.parse(localStorage.getItem('cart') || '{}');
+      console.log(currentCart);
+      const items = transformCartToArray(currentCart);
+      setCartItems(items)
     });
   }, []);
 
+  useEffect(() => {
+    if (!openDialog) {
+      setSelectedVariant({});
+    }
+  }, [openDialog]);
+
   const handleOpenDialog = ({ productId }) => {
-    const product = products.find((p) => p.id === productId);
+    const product = products.find((p) => p.product_id === productId);
+    setSelectedVariant(product.variants[0]);
     setSelectedProduct(product);
     setOpenDialog(true);
   };
@@ -80,6 +65,29 @@ function Home() {
   const handleCloseCart = () => {
     setOpenCart(false);
   };
+
+  const addToCart = (item) => {
+    let currentCart = JSON.parse(localStorage.getItem('cart') || '{}');
+    if (!currentCart[item.product_id]) {
+        currentCart[item.product_id] = { variants: [] };
+    }
+    currentCart[item.product_id].variants = [...currentCart[item.product_id].variants, item.variant_id];
+    localStorage.setItem('cart', JSON.stringify(currentCart));
+    setCartItems([...cartItems, item]);
+};
+
+// const transformCartToArray = (cart) => {
+//   let result = [];
+//   Object.keys(cart).forEach((productId) => {
+//       const productVariants = cart[productId].variants.map(variantId => {
+//           return { product_id: parseInt(productId), variant_id: variantId };
+//       });
+//       result = result.concat(productVariants);
+//   });
+
+//   return result;
+// };
+
 
   return (
     <>
@@ -108,13 +116,13 @@ function Home() {
           return (
             <ProductTile
               key={index}
-              src={product.imageUrl}
+              src={product.variants[0].imageUrl}
               onClick={() => {
                 // alert(product.id)
-                handleOpenDialog({ productId: product.variant_id });
+                handleOpenDialog({ productId: product.product_id });
               }}
               title={product.title}
-              price={product.price}
+              price={product.default_price}
             ></ProductTile>
           );
         })}
@@ -127,9 +135,13 @@ function Home() {
         {openDialog && (
           <div className="add-product-to-cart-modal">
             <div style={divStyle1}>
-              <p className="add-product-name-text">{selectedProduct.name}</p>
+              <p className="add-product-name-text">{selectedProduct.title}</p>
               <div className="add-product-modal-image-container">
-                <img src={iphone} alt="" className="add-product-image" />
+                <img
+                  src={selectedVariant.imageUrl}
+                  alt=""
+                  className="add-product-image"
+                />
               </div>
             </div>
 
@@ -139,15 +151,28 @@ function Home() {
                 {selectedProduct.variants.map((variant) => (
                   <div
                     key={variant.variant_id}
-                    className="variant-description-container"
+                    className={`variant-description-container ${
+                      selectedVariant.variant_id === variant.variant_id
+                        ? "active"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setSelectedVariant(variant);
+                    }}
                   >
-                    <p>{variant.description}</p>
+                    <p>{variant.detailed_description}</p>
                   </div>
                 ))}
               </div>
               <div style={divStyle2}>
-                <p style={priceTextStyle}>Price: ${selectedProduct.price}</p>
-                <div style={addProductButtonStyle}>
+                <p style={priceTextStyle}>Price: ${selectedVariant.price}</p>
+                <div style={addProductButtonStyle} onClick={() => {
+                  addToCart({
+                    product_id : selectedProduct.product_id,
+                    variant_id : selectedVariant.variant_id
+                  })
+                  handleCloseDialog()
+                }}>
                   <p>Add Product</p>
                 </div>
               </div>
@@ -155,21 +180,36 @@ function Home() {
           </div>
         )}
       </Modal>
-      <Cart open={openCart} handleClose={handleCloseCart} items={
-        [{
-          id: 2,
-          name: "iPhone Pro",
-          price: 1000.0,
-          variant : {
-            variant_id: 2,
-            description:
-              "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
-          },
-        }]
-      } />
+      <Cart
+        open={openCart}
+        handleClose={handleCloseCart}
+        items={cartItems.map((item) => {
+          const product = products.find((p) => p.product_id === item.product_id);
+          const variant = product.variants.find((v) => v.variant_id === item.variant_id);
+          return {
+            product_id : item.product_id,
+            variant_id : item.variant_id,
+            imageUrl : variant.imageUrl,
+            name : product.title,
+            description : variant.details,
+            price : variant.price,
+          };
+        })}
+      />
     </>
   );
 }
+
+// {
+//   id: 2,
+//   name: "iPhone Pro",
+//   price: 1000.0,
+//   variant: {
+//     variant_id: 2,
+//     description:
+//       "Illum pariatur possimus quaerat ipsum quos molestiae rem aspernatur dicta tenetur. Sunt placeat tempora vitae enim incidunt porro fuga ea.",
+//   },
+// },
 
 const divStyle1 = {
   display: "flex",

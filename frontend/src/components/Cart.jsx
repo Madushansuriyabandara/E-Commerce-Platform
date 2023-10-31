@@ -15,6 +15,12 @@ const Cart = ({ open, handleClose, items }) => {
     }
   }, [open]);
 
+  function isLoggedIn(){
+    const userLoggedIn = localStorage.getItem('tz-user-logged-in');
+    if(!userLoggedIn || userLoggedIn === 'false') return false;
+    else if(userLoggedIn === 'true') return true;
+  }
+
   return (
     <>
       {open && (
@@ -50,18 +56,18 @@ const Cart = ({ open, handleClose, items }) => {
                     {items.map((item) => {
                       return (
                         <div
-                          key={item.variant.variant_id}
+                          key={item.variant_id}
                           className="cart-item-container"
                         >
                           <img
-                            src={iphone}
+                            src={item.imageUrl}
                             alt=""
                             className="cart-item-image"
                           />
                           <div className="cart-item-description">
                             <p className="cart-item-title-text">{item.name}</p>
                             <p className="cart-item-variant-text">
-                              {item.variant.description}
+                              {item.description}
                             </p>
                           </div>
                           <div
@@ -69,6 +75,7 @@ const Cart = ({ open, handleClose, items }) => {
                               display: "grid",
                               gridTemplateColumns: "1fr",
                               gridTemplateRows: "1fr 3fr 1fr",
+                              marginLeft : 'auto'
                             }}
                           >
                             <div
@@ -103,7 +110,7 @@ const Cart = ({ open, handleClose, items }) => {
                       );
                     })}
                   </div>
-                  <Link to="/checkout">
+                  <Link to={isLoggedIn() ? "/checkout" : "/login?redirect=/checkout"}>
                     <div
                       style={{
                         display: "flex",
@@ -137,4 +144,18 @@ const Cart = ({ open, handleClose, items }) => {
   );
 };
 
-export default Cart;
+const transformCartToArray = (cart) => {
+  let result = [];
+  Object.keys(cart).forEach((productId) => {
+      const productVariants = cart[productId].variants.map(variantId => {
+          return { product_id: parseInt(productId), variant_id: variantId };
+      });
+      result = result.concat(productVariants);
+  });
+
+  return result;
+};
+
+export {Cart, transformCartToArray};
+
+

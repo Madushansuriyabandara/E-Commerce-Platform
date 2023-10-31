@@ -68,7 +68,13 @@
     box-shadow: 0.5px 0.5px 5px rgba(0, 0, 0, 0.2);
     animation-name: slideUp;
     animation-duration: 1s;
+    justify-content: flex-start;
+    margin-bottom: 10px;
 }
+
+/* .cart-item-container::last-child{
+    margin-left: auto;
+} */
 
 .cart-item-image{
     width: 60px;
