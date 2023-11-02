@@ -19,7 +19,7 @@ router.post("/api/login", async (req, res) => {
     if (!userDetails) {
       return res.status(404).send({ message: "User not found." });
     } else if (userDetails.passwd === password) {
-      res.status(200).send({ message: "Login successful" });
+      res.status(200).send({ message: "Login successful", user_id : userDetails.user_id });
     } else {
       res.status(401).send({ message: "Invalid credentials" });
     }

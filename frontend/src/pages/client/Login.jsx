@@ -27,6 +27,8 @@ function Login(props) {
       .then(response => {
         console.log('Login successful', response); // Assuming 'navigate' is correctly instantiated from useHistory or useNavigate
         localStorage.setItem('tz-user-logged-in', 'true')
+        localStorage.setItem('tz-user-id', `${response.data.user_id}`)
+        
         navigate(fromPage, { replace: true });
       })
       .catch(error => {

@@ -5,10 +5,11 @@ import { ReactComponent as LogoIcon } from "../../icons/new/logo.svg";
 import { Navbar, NavItem } from "../../components/Navbar";
 import { ProductGrid, ProductTile } from "../../components/Product";
 import Modal from "../../components/Modal";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Cart, transformCartToArray } from "../../components/Cart";
 import axios from "axios";
 import useSessionLikeLocalStorage from "../../components/hooks/SessionHook";
+import Menu from "../../components/Menu";
 
 const baseURL = "http://127.0.0.1:5000";
 
@@ -24,20 +25,66 @@ function Home() {
 
   const [products, setProducts] = useState([]);
 
+  const [displayMenu, setDisplayMenu] = useState(false);
+
+  const [menu, setMenu] = useState([]);
+
+  const [categoryId, setCategoryId] = useState(0);
+
+  function handleCategoryChange(id){
+    console.log('About to set category in Home to:', id);
+    setCategoryId(id);
+    console.log('Category in Home : '+categoryId);
+  }
+
+  const menuRef = useRef(null);
+  
   useSessionLikeLocalStorage();
 
   useEffect(() => {
-    axios.get(`${baseURL}/api/products`).then((response) => {
+    console.log('Updated Category in Home : ' + categoryId);
+    axios.get(`${baseURL}/api/products`, {params : {categoryId : categoryId}}).then((response) => {
       let data = [];
       for (let key in response.data) {
         data.push(response.data[key]);
       }
       setProducts(data);
-      
-      let currentCart = JSON.parse(localStorage.getItem('cart') || '{}');
+    })
+  }, [categoryId]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setDisplayMenu(false)
+      }
+    }
+  
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+  
+    // Remove event listener on cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
+
+  useEffect(() => {
+    axios.get(`${baseURL}/api/menu`).then((response) => {
+      console.log(response.data)
+      setMenu(response.data);
+    });
+
+    axios.get(`${baseURL}/api/products`, { params: { categoryId: 0 } }).then((response) => {
+      let data = [];
+      for (let key in response.data) {
+        data.push(response.data[key]);
+      }
+      setProducts(data);
+
+      let currentCart = JSON.parse(localStorage.getItem("cart") || "{}");
       console.log(currentCart);
       const items = transformCartToArray(currentCart);
-      setCartItems(items)
+      setCartItems(items);
     });
   }, []);
 
@@ -67,27 +114,17 @@ function Home() {
   };
 
   const addToCart = (item) => {
-    let currentCart = JSON.parse(localStorage.getItem('cart') || '{}');
+    let currentCart = JSON.parse(localStorage.getItem("cart") || "{}");
     if (!currentCart[item.product_id]) {
-        currentCart[item.product_id] = { variants: [] };
+      currentCart[item.product_id] = { variants: [] };
     }
-    currentCart[item.product_id].variants = [...currentCart[item.product_id].variants, item.variant_id];
-    localStorage.setItem('cart', JSON.stringify(currentCart));
+    currentCart[item.product_id].variants = [
+      ...currentCart[item.product_id].variants,
+      item.variant_id,
+    ];
+    localStorage.setItem("cart", JSON.stringify(currentCart));
     setCartItems([...cartItems, item]);
-};
-
-// const transformCartToArray = (cart) => {
-//   let result = [];
-//   Object.keys(cart).forEach((productId) => {
-//       const productVariants = cart[productId].variants.map(variantId => {
-//           return { product_id: parseInt(productId), variant_id: variantId };
-//       });
-//       result = result.concat(productVariants);
-//   });
-
-//   return result;
-// };
-
+  };
 
   return (
     <>
@@ -97,7 +134,11 @@ function Home() {
         </div>
         <div className="nav-bar-route-container">
           <NavItem>
-            <MenuIcon />
+            <MenuIcon
+              onClick={() => {
+                setDisplayMenu(true);
+              }}
+            />
           </NavItem>
           <NavItem>
             <UserIcon />
@@ -111,6 +152,20 @@ function Home() {
       <div>
         <p className="main-text">All Products</p>
       </div>
+      {displayMenu && (
+        <div
+          ref={menuRef}
+          style={{
+            position: "absolute",
+            zIndex: "2",
+            display : 'flex',
+            top: "70px",
+            right: "200px",
+          }}
+        >
+          <Menu items={menu} onMenuItemClick={handleCategoryChange}/>
+        </div>
+      )}
       <ProductGrid>
         {products.map((product, index) => {
           return (
@@ -166,13 +221,16 @@ function Home() {
               </div>
               <div style={divStyle2}>
                 <p style={priceTextStyle}>Price: ${selectedVariant.price}</p>
-                <div style={addProductButtonStyle} onClick={() => {
-                  addToCart({
-                    product_id : selectedProduct.product_id,
-                    variant_id : selectedVariant.variant_id
-                  })
-                  handleCloseDialog()
-                }}>
+                <div
+                  style={addProductButtonStyle}
+                  onClick={() => {
+                    addToCart({
+                      product_id: selectedProduct.product_id,
+                      variant_id: selectedVariant.variant_id,
+                    });
+                    handleCloseDialog();
+                  }}
+                >
                   <p>Add Product</p>
                 </div>
               </div>
@@ -184,15 +242,19 @@ function Home() {
         open={openCart}
         handleClose={handleCloseCart}
         items={cartItems.map((item) => {
-          const product = products.find((p) => p.product_id === item.product_id);
-          const variant = product.variants.find((v) => v.variant_id === item.variant_id);
+          const product = products.find(
+            (p) => p.product_id === item.product_id
+          );
+          const variant = product.variants.find(
+            (v) => v.variant_id === item.variant_id
+          );
           return {
-            product_id : item.product_id,
-            variant_id : item.variant_id,
-            imageUrl : variant.imageUrl,
-            name : product.title,
-            description : variant.details,
-            price : variant.price,
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            imageUrl: variant.imageUrl,
+            name: product.title,
+            description: variant.details,
+            price: variant.price,
           };
         })}
       />

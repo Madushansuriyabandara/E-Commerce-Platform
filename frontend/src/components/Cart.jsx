@@ -2,10 +2,15 @@ import "./Cart.css";
 import React, { useState, useEffect } from "react";
 import iphone from "../images/iphone.png";
 import { ReactComponent as CloseIcon } from "../icons/close-icon.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const baseURL = "http://127.0.0.1:5000";
 
 const Cart = ({ open, handleClose, items }) => {
   const [isContentLoaded, setIsContentLoaded] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open) {
@@ -15,10 +20,39 @@ const Cart = ({ open, handleClose, items }) => {
     }
   }, [open]);
 
-  function isLoggedIn(){
-    const userLoggedIn = localStorage.getItem('tz-user-logged-in');
-    if(!userLoggedIn || userLoggedIn === 'false') return false;
-    else if(userLoggedIn === 'true') return true;
+  function isLoggedIn() {
+    const userLoggedIn = localStorage.getItem("tz-user-logged-in");
+    if (!userLoggedIn || userLoggedIn === "false") return false;
+    else if (userLoggedIn === "true") return true;
+  }
+
+  function insertToCart() {
+    let customer_id = localStorage.getItem("tz-user-id");
+    axios
+      .post(`${baseURL}/api/create-cart`, { customer_id : customer_id, cart_items : items })
+      .then((response) => {
+        localStorage.setItem('tz-cart-id', `${response.data.data.cartId}`)
+      })
+      .catch((error) => {
+        if (error.response) {
+          const status = error.response.status;
+          switch (status) {
+            case 500:
+              alert("Something went wrong.");
+              break;
+            default:
+              alert("An unknown error occurred.");
+              break;
+          }
+        } else if (error.request) {
+          console.log(error.request);
+          alert("The server did not respond. Please try again later.");
+        } else {
+          console.log("Error", error.message);
+          alert("An error occurred while sending the request.");
+        }
+        console.log(error.config);
+      });
   }
 
   return (
@@ -75,7 +109,7 @@ const Cart = ({ open, handleClose, items }) => {
                               display: "grid",
                               gridTemplateColumns: "1fr",
                               gridTemplateRows: "1fr 3fr 1fr",
-                              marginLeft : 'auto'
+                              marginLeft: "auto",
                             }}
                           >
                             <div
@@ -110,30 +144,37 @@ const Cart = ({ open, handleClose, items }) => {
                       );
                     })}
                   </div>
-                  <Link to={isLoggedIn() ? "/checkout" : "/login?redirect=/checkout"}>
-                    <div
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "5vh",
+                      width: "10vw",
+                      borderRadius: "5px",
+                      backgroundColor: "var(--main-blue)",
+                      gridRow: "3/4",
+                    }}
+                    onClick={async () => {
+                      if (isLoggedIn()) {
+                        insertToCart();
+                        navigate("/checkout");
+                      } else {
+                        navigate("/login");
+                      }
+                    }}
+                  >
+                    <p
                       style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "5vh",
-                        width: "10vw",
-                        borderRadius: "5px",
-                        backgroundColor: "var(--main-blue)",
-                        gridRow: "3/4",
+                        fontSize: "16pt",
+                        fontWeight: "600",
+                        color: "white",
                       }}
                     >
-                      <p
-                        style={{
-                          fontSize: "16pt",
-                          fontWeight: "600",
-                          color: "white",
-                        }}
-                      >
-                        Checkout
-                      </p>
-                    </div>
-                  </Link>
+                      Checkout
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -147,15 +188,13 @@ const Cart = ({ open, handleClose, items }) => {
 const transformCartToArray = (cart) => {
   let result = [];
   Object.keys(cart).forEach((productId) => {
-      const productVariants = cart[productId].variants.map(variantId => {
-          return { product_id: parseInt(productId), variant_id: variantId };
-      });
-      result = result.concat(productVariants);
+    const productVariants = cart[productId].variants.map((variantId) => {
+      return { product_id: parseInt(productId), variant_id: variantId };
+    });
+    result = result.concat(productVariants);
   });
 
   return result;
 };
 
-export {Cart, transformCartToArray};
-
-
+export { Cart, transformCartToArray };

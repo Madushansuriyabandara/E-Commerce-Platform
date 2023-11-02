@@ -4,13 +4,16 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import bodyParser from "body-parser";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getVariants } from "../modules/varinats.js";
+import { getVariants, getProductsByCategory } from "../modules/varinats.js";
 
 
 const router = express.Router();
 router.use(cors());
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
 
 const s3BucketName = process.env.S3_BUCKET_NAME;
 const s3BucketRegion = process.env.S3_BUCKET_REGION;
@@ -27,10 +30,18 @@ const s3 = new S3Client({
 
 
 router.get("/api/products", async (req, res) => {
+  let categoryId = parseInt(req.query.categoryId, 10);
+  console.log(categoryId);
     try {
-      let products = await getVariants();
+      let products = [];
       let outputData = {};
   
+      if(categoryId && categoryId !== 0){
+        products = await getProductsByCategory(categoryId);
+      }
+      else{
+        products = await getVariants();
+      }
       function insertToData(product) {
           if(product.product_id in outputData){
               outputData[product.product_id].variants.push({
