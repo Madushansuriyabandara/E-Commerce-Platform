@@ -67,7 +67,7 @@ router.post('/api/create-cart', async (req, res) => {
         const command = new GetObjectCommand(getObjectParams);
         const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
 
-        totalAmount += item.price;
+        totalAmount += parseFloat(item.price);
         deliveryEstimate = item.deliveryEstimate;
 
         item = {

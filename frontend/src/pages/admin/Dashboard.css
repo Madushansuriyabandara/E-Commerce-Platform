@@ -19,8 +19,8 @@
     grid-column: 2/3;
     overflow : hidden;
 }
-
+/* 
 ::-webkit-scrollbar {
     width: 0;
     background: transparent;
-}
+} */

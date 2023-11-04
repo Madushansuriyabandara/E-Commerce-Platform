@@ -1,4 +1,5 @@
 import { pool } from "./database.js";
+import bcrypt from 'bcrypt'
 
 export async function getUserDetails(username) {
   let result;
@@ -38,3 +39,35 @@ export async function isUserInMainCity(customerId) {
     connection.release();
   }
 }
+
+export const registerUser = async (userData) => {
+  const hashedPassword = await bcrypt.hash(userData.passwd, 10);
+  const sql = `
+    INSERT INTO user (
+      first_name, 
+      last_name, 
+      phone_no, 
+      email, 
+      passwd, 
+      address_no, 
+      address_street, 
+      address_city, 
+      address_district, 
+      user_type
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const values = [
+    userData.first_name, 
+    userData.last_name, 
+    userData.phone_no, 
+    userData.email, 
+    hashedPassword, 
+    userData.address_no, 
+    userData.address_street, 
+    userData.address_city, 
+    userData.address_district, 
+    'customer'
+  ];
+  const query = await pool.query(sql, values);
+  return query;
+};

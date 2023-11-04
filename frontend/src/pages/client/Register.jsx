@@ -3,35 +3,38 @@ import "./Register.css";
 import { ReactComponent as PersonIcon } from "../../icons/person-icon.svg";
 import InputField from "../../components/InputField";
 import ActionButton from "../../components/ActionButton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Register() {
   const initialFields = {
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    phone: "",
-    password: "",
+    phone_no: "",
+    passwd: "",
     reEnterPassword: "",
-    addressNumber: "",
-    addressStreet: "",
-    addressCity: "",
-    addressDistrict: "",
+    address_no: "",
+    address_street: "",
+    address_city: "",
+    address_district: "",
   };
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(initialFields);
+
+  const navigate = useNavigate();
 
   const stepOneFieldData = [
     {
       label: "first-name",
       title: "First Name",
       type: "text",
-      name: "firstName",
+      name: "first_name",
     },
-    { label: "last-name", title: "Last Name", type: "text", name: "lastName" },
+    { label: "last-name", title: "Last Name", type: "text", name: "last_name" },
     { label: "email", title: "Email", type: "email", name: "email" },
-    { label: "phone", title: "Phone Number", type: "text", name: "phone" },
+    { label: "phone", title: "Phone Number", type: "text", name: "phone_no" },
   ];
 
   const stepTwoFieldData = [
@@ -39,7 +42,7 @@ function Register() {
       label: "password",
       title: "Password",
       type: "password",
-      name: "password",
+      name: "passwd",
     },
     {
       label: "re-enter-password",
@@ -54,25 +57,25 @@ function Register() {
       label: "address-number",
       title: "Address Number",
       type: "text",
-      name: "addressNumber",
+      name: "address_no",
     },
     {
       label: "address-street",
       title: "Address Street",
       type: "text",
-      name: "addressStreet",
+      name: "address_street",
     },
     {
       label: "address-city",
       title: "Address City",
       type: "text",
-      name: "addressCity",
+      name: "address_city",
     },
     {
       label: "address-district",
       title: "Address District",
       type: "text",
-      name: "addressDistrict",
+      name: "address_district",
     },
   ];
 
@@ -89,8 +92,14 @@ function Register() {
     setStep(step - 1);
   };
 
-  const submitForm = () => {
-    console.log("Form submitted:", formData);
+  const submitForm = async () => {
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/api/register', formData);
+      console.log('Form submitted successfully:', response.data);
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to submit form:', error);
+    }
   };
 
   return (

@@ -13,66 +13,72 @@ function Sidebar({indexCallback}) {
   return (
     <div className="sidebar-container">
       <ActionButton
-        buttonText={"Dashboard"}
+        buttonText={"Quartely Sales Reports"}
         outlinedMode={selectedIndex !== "1"}
         isSelected={selectedIndex === "1"}
         height="5vh"
         width="80%"
+        fontSize="14pt"
         onTap={() => {
           changeSelected("1");
         }}
       />
       <ActionButton
-        buttonText={"Stock"}
+        buttonText={"Top Selling Products"}
         outlinedMode={selectedIndex !== "2"}
         isSelected={selectedIndex === "2"}
         height="5vh"
         width="80%"
+        fontSize="14pt"
         onTap={() => {
           changeSelected("2");
         }}
       />
       <ActionButton
-        buttonText={"Customers"}
+        buttonText={"Most Ordered Category"}
         outlinedMode={selectedIndex !== "3"}
         isSelected={selectedIndex === "3"}
         height="5vh"
         width="80%"
+        fontSize="14pt"
         onTap={() => {
           changeSelected("3");
         }}
       />
       <ActionButton
-        buttonText={"Orders"}
+        buttonText={"Peak Interest Period"}
         outlinedMode={selectedIndex !== "4"}
         isSelected={selectedIndex === "4"}
         height="5vh"
         width="80%"
+        fontSize="14pt"
         onTap={() => {
           changeSelected("4");
         }}
       />
       <ActionButton
-        buttonText={"Delivery"}
+        buttonText={"Customers"}
         outlinedMode={selectedIndex !== "5"}
         isSelected={selectedIndex === "5"}
         height="5vh"
         width="80%"
+        fontSize="14pt"
         onTap={() => {
           changeSelected("5");
         }}
       />
       <ActionButton
-        buttonText={"Reports"}
+        buttonText={"Orders"}
         outlinedMode={selectedIndex !== "6"}
         isSelected={selectedIndex === "6"}
         height="5vh"
         width="80%"
+        fontSize="14pt"
         onTap={() => {
           changeSelected("6");
         }}
       />
-      <ActionButton
+      {/* <ActionButton
         buttonText={"Settings"}
         outlinedMode={selectedIndex !== "7"}
         isSelected={selectedIndex === "7"}
@@ -81,7 +87,7 @@ function Sidebar({indexCallback}) {
         onTap={() => {
           changeSelected("7");
         }}
-      />
+      /> */}
       {/* <ActionButton buttonText={"Hello"} outlinedMode={true} height="5vh" width="80%"/>
       <ActionButton buttonText={"Hello"} outlinedMode={true} height="5vh" width="80%"/> */}
     </div>

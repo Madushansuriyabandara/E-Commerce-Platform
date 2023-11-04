@@ -10,6 +10,7 @@ import { Cart, transformCartToArray } from "../../components/Cart";
 import axios from "axios";
 import useSessionLikeLocalStorage from "../../components/hooks/SessionHook";
 import Menu from "../../components/Menu";
+import { useNavigate } from "react-router-dom";
 
 const baseURL = "http://127.0.0.1:5000";
 
@@ -30,6 +31,8 @@ function Home() {
   const [menu, setMenu] = useState([]);
 
   const [categoryId, setCategoryId] = useState(0);
+
+  const navigate = useNavigate();
 
   function handleCategoryChange(id){
     console.log('About to set category in Home to:', id);
@@ -141,7 +144,12 @@ function Home() {
             />
           </NavItem>
           <NavItem>
-            <UserIcon />
+            <UserIcon onClick={() =>{ 
+              let userLoggedIn = localStorage.getItem('tz-user-logged-in') || 'false';
+              if(!userLoggedIn || userLoggedIn !== 'true'){
+                navigate('/login');
+              }
+             }} />
           </NavItem>
           <NavItem>
             <CartIcon onClick={handleOpenCart} />

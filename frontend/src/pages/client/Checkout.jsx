@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Checkout.css";
 import { Navbar, NavItem } from "../../components/Navbar";
 import { ReactComponent as MenuIcon } from "../../icons/new/menus.svg";
@@ -14,11 +15,13 @@ function Checkout() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [deliveryEstimate, setDeliveryEstimate] = useState(0);
 
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
 
   const [deliveryMethod, setDeliveryMethod] = useState("Deliver to Doorstep");
   const [courierService, setCourierService] = useState("");
   const [isCourierSelectable, setIsCourierSelectable] = useState(true);
+
+  const navigate = useNavigate();
 
   const handleSelectChange = (event) => {
     setPaymentMethod(event.target.value);
@@ -83,7 +86,7 @@ function Checkout() {
         cart_id: parseInt(localStorage.getItem("tz-cart-id"))
       });
       console.log('Order placed successfully:', response.data);
-      return response.data;
+      navigate('/');
     } catch (error) {
       console.error('Error placing the order:', error.response ? error.response.data : error.message);
       throw error;
@@ -182,8 +185,8 @@ function Checkout() {
                   onChange={handleSelectChange}
                   className="select-box"
                 >
-                  <option value="cash">Cash on Delivery</option>
-                  <option value="card">Card Payment</option>
+                  <option value='Cash on Delivery'>Cash on Delivery</option>
+                  <option value='Card'>Card Payment</option>
                 </select>
               </div>
 
@@ -218,8 +221,8 @@ function Checkout() {
                     onChange={handleCourierChange}
                     disabled={!isCourierSelectable}
                   >
-                    <option value="dhl">DHL</option>
-                    <option value="courier">Courier Service</option>
+                    <option value="DHL">DHL</option>
+                    <option value="Courier Service">Courier Service</option>
                   </select>
                 </>
 

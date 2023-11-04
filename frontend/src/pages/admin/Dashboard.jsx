@@ -1,7 +1,12 @@
 import React, {useState} from 'react';
 import "./Dashboard.css";
 import Sidebar from './Sidebar';
-import StockTable from './tables/StockTable';
+import QuartelySalesReports from './content/QuartelySalesReports';
+import TopSellingProduct from './content/TopSellingProduct';
+import MostOrderedCategory from './content/MostOrderedCategory';
+import PeakInterestPeriod from './content/PeakInterestPeriod';
+import Customers from './content/Customers';
+import Orders from './content/Orders';
 
 
 function Dashboard() {
@@ -18,8 +23,12 @@ function Dashboard() {
       <div className='app-bar-container'></div>
       <Sidebar  indexCallback={handleSelectedIndexChange}/>
       <div className='content-container'>
-        {selectedIndex === "1" && (<p>Dashboard</p>)}
-        {selectedIndex === "2" && (<StockTable/>)}
+        {selectedIndex === "1" && (<QuartelySalesReports />)}
+        {selectedIndex === "2" && (<TopSellingProduct />)}
+        {selectedIndex === "3" && (<MostOrderedCategory />)}
+        {selectedIndex === "4" && (<PeakInterestPeriod />)}
+        {selectedIndex === "5" && (<Customers />)}
+        {selectedIndex === "6" && (<Orders />)}
       </div>
     </div>
   )

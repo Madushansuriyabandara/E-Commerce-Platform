@@ -125,6 +125,22 @@ const Cart = ({ open, handleClose, items }) => {
                                   fill: "black",
                                   gridRow: "1/2",
                                 }}
+
+                                onClick={() =>{
+                                  console.log('Clicked');
+                                  let currentCart = JSON.parse(localStorage.getItem('cart'));
+                                  if(currentCart[item.product_id].variants.length === 1){
+                                    delete currentCart[item.productId];
+                                  }
+
+                                  else{
+                                    let variantArray = currentCart[item.product_id].variants;
+                                    let newArray = variantArray.filter(variant => variant !== item.variant_id);
+                                    currentCart[item.product_id].variants = newArray;
+                                  }
+
+                                  localStorage.setItem('cart', JSON.stringify(currentCart));
+                                }}
                               />
                             </div>
 
