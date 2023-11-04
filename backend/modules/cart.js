@@ -35,67 +35,6 @@ export async function setCartAndCartItems(customer_id, cart_items) {
   }
 }
 
-// export async function getCartItems(cartId) {
-//   const connection = await pool.getConnection();
-//   try {
-//         const query = `
-//       SELECT ci.cart_id, ci.product_id, ci.variant_id, p.title, v.price, pr.detailed_description, v.image
-//       FROM cart_items AS ci
-//       JOIN product p ON ci.product_id = p.product_id
-//       JOIN variant v ON ci.variant_id = v.variant_id
-//       JOIN property pr ON ci.variant_id = pr.variant_id
-//       WHERE ci.cart_id = ?;
-//     `;
-//     const [rows] = await connection.execute(query, [cartId]);
-    
-//     const cartItems = rows.map((row) => ({
-//       cartId: row.cart_id,
-//       productId: row.product_id,
-//       variantId: row.variant_id,
-//       title: row.title,
-//       price: row.price,
-//       detailedDescription: row.detailed_description,
-//       image: row.image
-//     }));
-
-//     return cartItems;
-//   } catch (error) {
-//     throw error;
-//   } finally {
-//     connection.release();
-//   }
-// }
-
-
-//   try {
-//     const userDetails = await getUserDetails(1, [{ product_id: 101, variant_id: 201 }, { product_id: 102, variant_id: 202 }]);
-//     console.log('User Details:', userDetails);
-//   } catch (error) {
-//     console.error('Error:', error);
-//   }
-
-// Check if the user is in a main city
-// async function isUserInMainCity(customerId) {
-//   const connection = await pool.getConnection();
-//   try {
-//     const query = 'SELECT address_city FROM user WHERE user_id = ?';
-//     const [rows] = await connection.execute(query, [customerId]);
-//     if (rows.length === 0) {
-//       throw new Error('User not found.');
-//     }
-
-//     const addressCity = rows[0].address_city;
-//     const cityCheckQuery = 'SELECT COUNT(*) AS count FROM cities WHERE city_name LIKE ?';
-//     const [cityRows] = await connection.execute(cityCheckQuery, [addressCity]);
-//     return cityRows[0].count > 0;
-//   } catch (error) {
-//     throw error;
-//   } finally {
-//     connection.release();
-//   }
-// }
-
-// Get the cart items with delivery estimate
 export async function getCartItems(cartId) {
   const connection = await pool.getConnection();
   try {
